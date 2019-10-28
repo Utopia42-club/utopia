@@ -1,5 +1,6 @@
 *.swp
 dist
+.idea
 .DS_Store
 
 lib-cov
