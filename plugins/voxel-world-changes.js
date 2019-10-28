@@ -82,14 +82,18 @@ class WorldChanges extends EventEmitter {
     }
 
     importChanges(changes){
-        Object.keys(changes).map(chunkHash => {
-            Object.keys(changes[chunkHash]).map(voxelHash => {
-                let value = this.registry.getBlockIndex(changes[chunkHash][voxelHash].name);
-                if(value === undefined)
-                    throw new Error(`loading world changes failed. block with name ${changes[chunkHash][voxelHash].name} not registered`)
-                changes[chunkHash][voxelHash].value = value;
+        this.changes = {};
+        try {
+            Object.keys(changes).map(chunkHash => {
+                Object.keys(changes[chunkHash]).map(voxelHash => {
+                    let value = this.registry.getBlockIndex(changes[chunkHash][voxelHash].name);
+                    if (value === undefined)
+                        throw new Error(`loading world changes failed. block with name ${changes[chunkHash][voxelHash].name} not registered`)
+                    changes[chunkHash][voxelHash].value = value;
+                })
             })
-        })
+        }catch (e) {
+        }
         this.changes = changes;
     }
 
