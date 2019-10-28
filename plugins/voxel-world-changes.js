@@ -5,7 +5,7 @@ const EventEmitter = require('events').EventEmitter;
 module.exports = (game, opts) => new WorldChanges(game, opts);
 
 module.exports.pluginInfo = {
-    loadAfter: ['voxel-mine', 'voxel-use', "voxel-registry", 'utopia-land']
+    loadAfter: ['voxel-mine', 'voxel-use', "voxel-registry", 'utopia-materials']
 }
 
 class WorldChanges extends EventEmitter {
@@ -83,17 +83,19 @@ class WorldChanges extends EventEmitter {
 
     importChanges(changes){
         this.changes = {};
-        try {
-            Object.keys(changes).map(chunkHash => {
-                Object.keys(changes[chunkHash]).map(voxelHash => {
-                    let value = this.registry.getBlockIndex(changes[chunkHash][voxelHash].name);
-                    if (value === undefined)
-                        throw new Error(`loading world changes failed. block with name ${changes[chunkHash][voxelHash].name} not registered`)
-                    changes[chunkHash][voxelHash].value = value;
-                })
+        Object.keys(changes).map(chunkHash => {
+            Object.keys(changes[chunkHash]).map(voxelHash => {
+                let name = changes[chunkHash][voxelHash].name;
+                let value = this.registry.getBlockIndex(name);
+                // let value = this.registry.getBlockIndex(name);
+                console.log('chunkHash', chunkHash, 'voxelHash', voxelHash, 'name', name, 'value', value);
+                if (value === undefined)
+                    throw new Error(`loading world changes failed. block with name ${changes[chunkHash][voxelHash].name} not registered`)
+                delete changes[chunkHash][voxelHash].name;
+                changes[chunkHash][voxelHash].value = value;
             })
-        }catch (e) {
-        }
+        })
+        console.log('change imported:', changes);
         this.changes = changes;
     }
 

@@ -61,7 +61,8 @@ function main(worldChanges) {
             'kb-bindings-ui': require('kb-bindings-ui'),
             'voxel-player': require('voxel-player'),
             'voxel-world-changes': require('./plugins/voxel-world-changes'),
-            'voxel-land': require('./plugins/utopia-land')
+            'voxel-land': require('./plugins/utopia-land'),
+            'voxel-materials': require('./plugins/utopia-materials')
             // 'voxel-land': require('voxel-land'),
             // 'voxel-flatland': require('voxel-flatland'),
         }, pluginOpts: {
@@ -217,6 +218,7 @@ function main(worldChanges) {
             'kb-bindings-ui': {},
             // 'utopia-land': {},
             'voxel-land': {populateTrees: false},
+            'voxel-materials': {},
             // 'voxel-flatland': {block: 'bedrock', onDemand: false},
             'voxel-world-changes': {
                 // changes: {'0_0_0': {'0_31_0': {voxel:[0,31,0], name: 'air'}}}
@@ -275,9 +277,10 @@ function loadChanges() {
         .catch(error => {
             console.log('error', error);
             alert(error.message)
-            return "{}";
+            return `{"0_0_0":{"7_31_3":{"voxel":[7,31,3],"name":"air"},"7_31_4":{"voxel":[7,31,4],"name":"air"},"7_31_2":{"voxel":[7,31,2],"name":"air"}},"0_1_0":{"7_1_5":{"voxel":[7,1,5],"name":"dirt"},"7_2_5":{"voxel":[7,2,5],"name":"dirt"},"7_3_5":{"voxel":[7,3,5],"name":"dirt"}}}`;
         })
         .then(userChangesStr => {
+            console.log('file from ipfs', userChangesStr);
             let userChanges = {};
             try{
                 userChanges = JSON.parse(userChangesStr);
