@@ -1,5 +1,5 @@
 const ipfsClient = require('ipfs-http-client')
-const ipfs = ipfsClient('/ip4/127.0.0.1/tcp/5001')
+const ipfs = ipfsClient('/ip4/159.65.160.34/tcp/5001')
 
 function save(data){
     // return Promise.resolve('QmQNXSc9EEKGb7QTTvEKHR1YqpwHuHKDRARQF2Y5MxZSAd')
