@@ -275,6 +275,7 @@ function loadChanges() {
             return ipfsMethods.getFile(ipfsId)
         })
         .catch(error => {
+
             console.log('error', error);
             return `{}`;
         })
