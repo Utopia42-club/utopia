@@ -276,8 +276,7 @@ function loadChanges() {
         })
         .catch(error => {
             console.log('error', error);
-            alert(error.message)
-            return `{"0_0_0":{"7_31_3":{"voxel":[7,31,3],"name":"air"},"7_31_4":{"voxel":[7,31,4],"name":"air"},"7_31_2":{"voxel":[7,31,2],"name":"air"}},"0_1_0":{"7_1_5":{"voxel":[7,1,5],"name":"dirt"},"7_2_5":{"voxel":[7,2,5],"name":"dirt"},"7_3_5":{"voxel":[7,3,5],"name":"dirt"}}}`;
+            return `{}`;
         })
         .then(userChangesStr => {
             console.log('file from ipfs', userChangesStr);
