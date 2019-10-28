@@ -102,6 +102,7 @@ class WorldChanges extends EventEmitter {
         Object.keys(result).map(chunkHash => {
             Object.keys(result[chunkHash]).map(voxelHash => {
                 let name = this.registry.getBlockName(result[chunkHash][voxelHash].value);
+                console.log('exporting ...', {chunkHash, voxelHash, name: name})
                 if(name === undefined)
                     throw new Error(`exporting world changes failed. block with index ${result[chunkHash][voxelHash].value} not registered`)
                 delete result[chunkHash][voxelHash].value;
