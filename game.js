@@ -1,4 +1,5 @@
 const createEngine = require('voxel-engine-stackgl');
+const Web3 = require('web3');
 var ipfsMethods = require('./utils/ipfs');
 var {updateKey, ipfsKey} = require('./utils/ethereum');
 
@@ -62,9 +63,10 @@ function main(worldChanges) {
             'voxel-player': require('voxel-player'),
             'voxel-world-changes': require('./plugins/voxel-world-changes'),
             'voxel-land': require('./plugins/utopia-land'),
-            'voxel-materials': require('./plugins/utopia-materials')
+            'voxel-materials': require('./plugins/utopia-materials'),
             // 'voxel-land': require('voxel-land'),
             // 'voxel-flatland': require('voxel-flatland'),
+            'utopia-land-assign': require('./plugins/utopia-land-assign'),
         }, pluginOpts: {
             'voxel-engine-stackgl': {
                 appendDocument: true,
@@ -224,6 +226,7 @@ function main(worldChanges) {
                 // changes: {'0_0_0': {'0_31_0': {voxel:[0,31,0], name: 'air'}}}
                 changes: worldChanges
             },
+            'utopia-land-assign': {enable: false}
         }
     });
 
@@ -235,9 +238,9 @@ function main(worldChanges) {
             .then(() => {
                 return ethereum.enable()
             })
-            .then(() => {
-                web3.eth.defaultAccount = web3.eth.accounts[0];
-            })
+            // .then(() => {
+            //     web3.eth.defaultAccount = web3.eth.accounts[0];
+            // })
             .then(() => {
                 return ipfsMethods.save(JSON.stringify(changes));
             })
@@ -252,9 +255,15 @@ function main(worldChanges) {
                 alert(error.message);
             })
     })
+
+    document.getElementById('btn-assign-land').addEventListener('click', () => {
+        console.log('assigning land to user ...');
+        game.plugins.get('utopia-land-assign').toggle();
+    })
 }
 
 function loadChanges() {
+    // let web3 = new Web3(window.web3.currentProvider);
 
     console.log('loading world changes ...');
     // Promise.resolve(true)
@@ -264,9 +273,10 @@ function loadChanges() {
         })
         .then(() => {
             console.log('ethereum enabled')
-            web3.eth.defaultAccount = web3.eth.accounts[0];
+            // web3.eth.defaultAccount = web3.currentProvider.selectedAddress;
         })
         .then(() => {
+            console.log('retrieve IPFS key ...')
             return ipfsKey();
         })
         .then(ipfsId => {
@@ -275,8 +285,7 @@ function loadChanges() {
             return ipfsMethods.getFile(ipfsId)
         })
         .catch(error => {
-
-            console.log('error', error);
+            console.error(error);
             return `{}`;
         })
         .then(userChangesStr => {

@@ -1,3 +1,5 @@
+const Web3 = require('web3');
+
 
 function updateKey(ipfsId) {
     return new Promise(function (resolve, reject) {
@@ -12,6 +14,8 @@ function updateKey(ipfsId) {
 }
 
 function ipfsKey(){
+    // let web3 = new Web3(window.web3.currentProvider);
+
     return new Promise(function (resolve, reject) {
         let contract = web3.eth.contract(ABI).at(CONTRACT_ADDRESS);
         contract.ipfsKey((error, key) => {
