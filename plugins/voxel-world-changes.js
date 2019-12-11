@@ -5,7 +5,7 @@ const EventEmitter = require('events').EventEmitter;
 module.exports = (game, opts) => new WorldChanges(game, opts);
 
 module.exports.pluginInfo = {
-    loadAfter: ['voxel-mine', 'voxel-use', "voxel-registry", 'utopia-materials']
+    loadAfter: ['voxel-mine', 'voxel-use', "voxel-registry", 'utopia-materials', 'utopia-land-assign']
 }
 
 class WorldChanges extends EventEmitter {
@@ -20,6 +20,8 @@ class WorldChanges extends EventEmitter {
         this.mine = game.plugins.get('voxel-mine');
         this.use = game.plugins.get('voxel-use');
         this.registry = game.plugins.get('voxel-registry');
+        this.assign = game.plugins.get('utopia-land-assign');
+
         if(opts.changes)
             this.importChanges(opts.changes);
 
