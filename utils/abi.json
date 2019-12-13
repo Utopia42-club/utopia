@@ -7,6 +7,39 @@
         "type": "uint256"
       }
     ],
+    "name": "owners",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "allowPublicAssign",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "name": "admins",
     "outputs": [
       {
@@ -23,14 +56,57 @@
     "inputs": [
       {
         "name": "",
+        "type": "address"
+      },
+      {
+        "name": "",
         "type": "uint256"
       }
     ],
-    "name": "onwers",
+    "name": "lands",
     "outputs": [
+      {
+        "name": "x1",
+        "type": "int256"
+      },
+      {
+        "name": "x2",
+        "type": "int256"
+      },
+      {
+        "name": "y1",
+        "type": "int256"
+      },
+      {
+        "name": "y2",
+        "type": "int256"
+      },
+      {
+        "name": "time",
+        "type": "uint256"
+      },
+      {
+        "name": "hash",
+        "type": "string"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
       {
         "name": "",
         "type": "address"
+      }
+    ],
+    "name": "adminsMap",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
       }
     ],
     "payable": false,
@@ -61,7 +137,7 @@
     "constant": true,
     "inputs": [
       {
-        "name": "onwer",
+        "name": "owner",
         "type": "address"
       }
     ],
@@ -71,19 +147,19 @@
         "components": [
           {
             "name": "x1",
-            "type": "uint256"
+            "type": "int256"
           },
           {
             "name": "x2",
-            "type": "uint256"
+            "type": "int256"
           },
           {
             "name": "y1",
-            "type": "uint256"
+            "type": "int256"
           },
           {
             "name": "y2",
-            "type": "uint256"
+            "type": "int256"
           },
           {
             "name": "time",
@@ -106,7 +182,7 @@
     "constant": true,
     "inputs": [
       {
-        "name": "onwer",
+        "name": "owner",
         "type": "address"
       },
       {
@@ -118,19 +194,19 @@
     "outputs": [
       {
         "name": "x1",
-        "type": "uint256"
+        "type": "int256"
       },
       {
         "name": "y1",
-        "type": "uint256"
+        "type": "int256"
       },
       {
         "name": "x2",
-        "type": "uint256"
+        "type": "int256"
       },
       {
         "name": "y2",
-        "type": "uint256"
+        "type": "int256"
       },
       {
         "name": "time",
@@ -150,22 +226,80 @@
     "inputs": [
       {
         "name": "x1",
-        "type": "uint256"
+        "type": "int256"
       },
       {
         "name": "y1",
-        "type": "uint256"
+        "type": "int256"
       },
       {
         "name": "x2",
-        "type": "uint256"
+        "type": "int256"
       },
       {
         "name": "y2",
-        "type": "uint256"
+        "type": "int256"
       }
     ],
     "name": "assignLand",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "x1",
+        "type": "int256"
+      },
+      {
+        "name": "y1",
+        "type": "int256"
+      },
+      {
+        "name": "x2",
+        "type": "int256"
+      },
+      {
+        "name": "y2",
+        "type": "int256"
+      },
+      {
+        "name": "addr",
+        "type": "address"
+      }
+    ],
+    "name": "adminAssignLand",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "val",
+        "type": "bool"
+      }
+    ],
+    "name": "adminSetIsPublic",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "addr",
+        "type": "address"
+      }
+    ],
+    "name": "addAdmin",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",

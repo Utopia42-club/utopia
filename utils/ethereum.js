@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 let _web3=null, _contract=null;
 
-const CONTRACT_ADDRESS = '0x20AA4F0A64AB27d1D29F3e58ac6a361f380c0E32'
+const CONTRACT_ADDRESS = '0x9344CdEc9cf176E3162758D23d1FC806a0AE08cf';
 const ABI = require('./abi');
 
 function getSmartContract() {
@@ -51,11 +51,11 @@ let lands = {
 function getOwnerList(){
     return new Promise(function (resolve, reject) {
         let contract = getSmartContract();
-        contract.methods.getOwners().call((error, key) => {
+        contract.methods.getOwners().call((error, response) => {
             if (error)
                 reject(error);
             // it returns tx hash because sending tx
-            resolve(key);
+            resolve(response);
         });
     })
 }
@@ -132,6 +132,7 @@ function getUsersAssignee(){
     let owners = [];
     return getOwnerList()
         .then(list => {
+            console.log('[STA] owners list response', list);
             owners = list;
             return Promise.all(owners.map(wallet => getOwnerLands(wallet)))
         })
