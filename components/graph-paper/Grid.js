@@ -69,7 +69,7 @@ class Grid extends EventEmitter{
     }
 
     onMouseDown(e){
-        if(!e.ctrlKey) {
+        if(e.which === 1 && !e.ctrlKey) {
             this.oldXGridStart = this.xGridStart;
             this.oldYGridStart = this.yGridStart;
 
@@ -84,7 +84,8 @@ class Grid extends EventEmitter{
         this.emit('mousedown', {
             xy: this.getMouseRelativeXY(e),
             ctrlKey: e.ctrlKey,
-            shiftKey: e.shiftKey
+            shiftKey: e.shiftKey,
+            which: e.which
         });
     }
 

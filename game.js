@@ -354,6 +354,13 @@ function main(userWallet, userAssignees, worldChanges) {
         game.plugins.get('utopia-land-assign').toggle();
     })
 
+    game.plugins.get('utopia-land-assign').on('go-to-location', e => {
+        // alert(JSON.stringify(e, null, 2));
+        let {x, y} = e.xy;
+        // alert(`going to X:${x}, Y:${y}`);
+        // game.playerAABB(x, 50, y);
+        game.plugins.get('game-shell-fps-camera').camera.position.set([-x, -40, -y]);
+    })
     game.plugins.get('utopia-land-assign').on('save', rectangles => {
         console.log('[STA] rectangles to save: ', rectangles)
         let allPromise = rectangles

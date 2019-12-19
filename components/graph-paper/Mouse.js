@@ -1,3 +1,7 @@
+const MOUSE_LEFT_BUTTON = 1;
+const MOUSE_MIDDLE_BUTTON = 2;
+const MOUSE_RIGHT_BUTTON = 3;
+
 module.exports = class Mouse {
   constructor (graphPaper, opts) {
     this.graphPaper = graphPaper;
@@ -68,3 +72,7 @@ module.exports = class Mouse {
     return this
   }
 }
+
+module.exports.MOUSE_LEFT_BUTTON = MOUSE_LEFT_BUTTON;
+module.exports.MOUSE_MIDDLE_BUTTON = MOUSE_MIDDLE_BUTTON;
+module.exports.MOUSE_RIGHT_BUTTON = MOUSE_RIGHT_BUTTON;

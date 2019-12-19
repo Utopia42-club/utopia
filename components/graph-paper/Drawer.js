@@ -1,5 +1,10 @@
-module.exports = class Drawer {
+const events = require('events');
+const Mouse = require('./Mouse');
+
+module.exports = class Drawer extends events{
     constructor (graphPaper, opts) {
+        super();
+
         this.graphPaper = graphPaper;
         this.canvas = graphPaper.canvas
 
@@ -37,12 +42,20 @@ module.exports = class Drawer {
     }
 
     onMouseDown(e){
-        if(e.ctrlKey){
-            this.drawing = true;
-            this.startDrawXY = e.xy;
-            this.endDrawXY = e.xy;
-        }else{
-            this.drawing = false;
+        switch (e.which) {
+            case Mouse.MOUSE_LEFT_BUTTON:
+                if(e.ctrlKey){
+                    this.drawing = true;
+                    this.startDrawXY = e.xy;
+                    this.endDrawXY = e.xy;
+                }else{
+                    this.drawing = false;
+                }
+                break;
+            case Mouse.MOUSE_MIDDLE_BUTTON:
+                break;
+            case Mouse.MOUSE_RIGHT_BUTTON:
+                break;
         }
         // console.log('mousedown', xy);
     }

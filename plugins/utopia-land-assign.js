@@ -2,7 +2,7 @@
 
 const EventEmitter = require('events').EventEmitter;
 const ever = require('ever');
-const {GraphPaper} = require('../components/graph-paper')
+const {GraphPaper, Mouse} = require('../components/graph-paper')
 
 module.exports = (game, opts) => {
     if (game.isClient) {
@@ -111,8 +111,18 @@ class LandAssignClient extends LandAssignCommon {
                 );
             }
         }
+        let grid = this.graphPaper.getPlugin('grid');
+        grid.on('mousedown', e => {
+            if(e.which === Mouse.MOUSE_RIGHT_BUTTON)
+                this.emit('go-to-location', e);
+        })
         this.container.querySelector('#utopia-land-assign-btn-save').addEventListener('click', this.onSaveBtnClick)
         this.container.querySelector('#utopia-land-assign-btn-cancel').addEventListener('click', this.onCancelBtnClick)
+        // this.container.querySelector('canvas')
+        //     .addEventListener('contextmenu', e => {
+        //         e.preventDefault();
+        //         alert(123)
+        //     })
         super.enable();
     }
 
@@ -162,6 +172,8 @@ const CONTAINER_TEMPLATE = `
         <button id="utopia-land-assign-btn-cancel">Cancel</button>
     </div>
     <div style="position: relative; flex-grow: 1">
-        <canvas id="utopia-land-assign-canvas" style="width: 100%; height: 100%"></canvas>
+        <canvas id="utopia-land-assign-canvas" style="width: 100%; height: 100%">
+            Your Browser does not support the canvas element.
+        </canvas>
     </div>
 </div>`;
