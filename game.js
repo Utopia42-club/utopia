@@ -40,7 +40,7 @@ function mergeChangesOfRegions(regions, chunkSize, worldChanges) {
             .map(key => region[key])
             .map(({voxel, name}) => {
                 let chunk = voxel.map(n => Math.floor(n/chunkSize));
-                let voxel2 = voxel.map(n => n%chunkSize);
+                let voxel2 = voxel.map((n,i) => (n-chunk[i]*chunkSize));
 
                 let chunkKey = chunk.join('_');
                 let voxelKey = voxel2.join('_');
