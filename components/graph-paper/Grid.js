@@ -181,6 +181,12 @@ class Grid extends EventEmitter{
         this.lines = lines
     }
 
+    project(x, y){
+        let {xGridStart, yGridStart} = this;
+        return {x: x - xGridStart, y: y - yGridStart}
+    }
+
+
     unproject(x, y){
         let {xGridStart, yGridStart} = this;
         return {x: x + xGridStart, y: y + yGridStart}

@@ -1,5 +1,6 @@
 const createEngine = require('voxel-engine-stackgl');
 const Web3 = require('web3');
+const ItemPile = require('itempile');
 var ipfsMethods = require('./utils/ipfs');
 var {
     getUsersAssignee,
@@ -246,7 +247,10 @@ function main(userWallet, userAssignees, worldChanges) {
             'voxel-gamemode': {},
             // Increases voxel-control's max walk speed when forward is double-tapped
             'voxel-sprint': {},
-            'voxel-inventory-hotbar': {inventorySize: 10, wheelEnable: true},
+            'voxel-inventory-hotbar': {
+                inventorySize: 10,
+                wheelEnable: true
+            },
             'voxel-inventory-crafting': {},
             'voxel-reach': {reachDistance: 8},
             // using a transparent texture decal for block break progress
@@ -391,6 +395,15 @@ function main(userWallet, userAssignees, worldChanges) {
     // game.controls.on('data', data => {
     //     console.log('[STA] controls emits data', data);
     // })
+
+    setInterval(() => {
+        try {
+            let inventoryHotBar = game.plugins.get('voxel-inventory-hotbar');
+            inventoryHotBar.inventory.set(0, new ItemPile('dirt', 64, {}));
+        }catch (e) {
+            console.error("===============", e);
+        }
+    }, 15000);
 }
 
 function loadAllIpfsFiles(assignees) {

@@ -3,6 +3,7 @@
 const Grid = require('./Grid');
 const Mouse = require('./Mouse');
 const Drawer = require('./Drawer');
+const UserCoordinate = require('./UserCoordinate');
 
 module.exports = class GraphPaper {
     constructor(canvasID){
@@ -11,7 +12,8 @@ module.exports = class GraphPaper {
         this.plugins = {
             'mouse': Mouse,
             'grid': Grid,
-            'drawer': Drawer
+            'drawer': Drawer,
+            'z_coordinate': UserCoordinate
         };
 
         this.pluginOptions = {

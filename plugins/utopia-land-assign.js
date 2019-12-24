@@ -116,6 +116,13 @@ class LandAssignClient extends LandAssignCommon {
             if(e.which === Mouse.MOUSE_RIGHT_BUTTON)
                 this.emit('go-to-location', e);
         })
+
+
+        this.game.plugins.get('game-shell-fps-camera').on('view', (viewMatrix) => {
+            // console.log('game-shell-fps-camera:view', viewMatrix);
+            let pos = this.game.cameraPosition();
+            this.graphPaper.getPlugin('z_coordinate').setPos(pos[0], pos[2]);
+        })
         this.container.querySelector('#utopia-land-assign-btn-save').addEventListener('click', this.onSaveBtnClick)
         this.container.querySelector('#utopia-land-assign-btn-cancel').addEventListener('click', this.onCancelBtnClick)
         // this.container.querySelector('canvas')
