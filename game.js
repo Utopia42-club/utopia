@@ -11,6 +11,7 @@ var {
 } = require('./utils/ethereum');
 
 const TEST_MODE = true;
+const TEST_WALLET_ADDRESS = '0xE602D154C00cB2c1570AF23d631191838C0F072a';
 
 function separateChangesOfRegions(regions, chunkSize, changes){
     let regionChanges = new Array(regions.length).fill(0).map(i => ({}));
@@ -417,19 +418,46 @@ function loadAllIpfsFiles(assignees) {
     return Promise.all(allPromise);
 }
 
+function web3Init(){
+    let _web3;
+    try {
+        _web3 = web3;
+    }catch (e) {
+        let rpcUrl = "https://ropsten.infura.io/ocCdekUYwOyLn7h7OlJM";
+        _web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+
+        // _web3.eth.accounts.wallet.add(account);
+        _web3.eth.defaultAccount = TEST_WALLET_ADDRESS;
+        // _web3.currentProvider.selectedAddress = account.address;
+
+        // _web3.eth.accounts.wallet.add(TEST_WALLET_PRIVATE_KEY);
+        // _web3.eth.defaultAccount = TEST_WALLET_ADDRESS;
+        _web3.eth.getAccounts().then(acc => {
+            console.log('account list >>>>', acc);
+        });
+    }
+    window.web3 = _web3;
+}
+
 function loadChanges() {
     // let web3 = new Web3(window.web3.currentProvider);
+    web3Init();
+
     let userWallet = null;
     let userAssignees = {};
     console.log('loading world changes ...');
     // Promise.resolve(true)
     Promise.resolve(true)
         .then(() => {
-            return ethereum.enable()
+            try {
+                return ethereum.enable();
+            }catch (e) {
+                console.error(e);
+            }
         })
         .then(() => {
-            userWallet = web3.currentProvider.selectedAddress;
-            console.log('[STA] ethereum enabled: '+ userWallet)
+            userWallet = web3.currentProvider.selectedAddress || TEST_WALLET_ADDRESS;
+            console.log('[STA] ethereum enabled: ' + userWallet)
         })
         .then(getOwnerList)
         .then(owners => {

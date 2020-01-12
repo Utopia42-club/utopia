@@ -75,6 +75,6 @@
   },
   "scripts": {
     "start": "beefy home.js:home-bundle.js game.js:game-bundle.js --watchify --port 3000 --debug",
-    "build": "browserify home.js > home-bundle.js --debug"
+    "build": "browserify game.js > game-bundle.js --debug"
   }
 }
