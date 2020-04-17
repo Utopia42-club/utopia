@@ -61,6 +61,27 @@
             background: rgba(0,0,255,0.5);
             color: white;
         }
+        #arena-chat{
+            z-index: 999;
+            position: absolute;
+            visibility: hidden;
+        }
+        body.enable-chat #arena-chat{
+            visibility: visible;
+        }
+        .btn-chat-toggle{
+            position: absolute;
+            right: 1em;
+            bottom: 1em;
+            z-index: 99;
+            width: 4em;
+            height: 4em;
+            background: white;
+            outline: none;
+            border-radius: 2em;
+            border-width: 0;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -76,5 +97,17 @@
 <script src="game-bundle.js"></script>
 
 <div id="crosshair"><img src="crosshair4.png"></div>
+
+<!-- arena.im message box -->
+<button class="btn-chat-toggle" onclick="toggleChatbox()">chat</button>
+<div id="arena-chat" data-publisher="utopia" data-chatroom="utopia-global" data-position="in-page"></div>
+<script async src="https://go.arena.im/public/js/arenachatlib.js?p=utopia&e=utopia-global"></script>
+<script>
+    function toggleChatbox() {
+        var element = document.body;
+        element.classList.toggle("enable-chat");
+    }
+</script>
+
 </body>
 </html>
