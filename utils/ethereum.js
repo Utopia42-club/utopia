@@ -1,20 +1,60 @@
 const Web3 = require('web3');
 let _web3=null, _contract=null;
 
-const CONTRACT_ADDRESS = '0x9344CdEc9cf176E3162758D23d1FC806a0AE08cf';
+const CONTRACT_ADDRESS = {
+    '1': '', // Main Net
+    '3': '0x9344CdEc9cf176E3162758D23d1FC806a0AE08cf', // Ropsten
+    '4': '0x8092f992F75E08135c33e07CC49a504e90790b21', // Rinkeby
+    '5': '', // Goerli
+    '42': '', // Kovan
+};
 const ABI = require('./abi');
 
-function getSmartContract() {
-    if(!_web3){
-        _web3 = new Web3(window.web3.currentProvider);
-        _contract = new _web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+var METAMASK_PROVIDER_LIST = {
+    '1': "Ethereum Main Network",
+    '3': "Ropsten Test Network",
+    '4': "Rinkeby Test Network",
+    '5': "Goerli Test Network",
+    '42':"Kovan Test Network"
+};
+
+const INFURA_NETWORK_SUBDOMAINS = {
+    '1': "mainnet",
+    '3': "ropsten",
+    '4': "rinkeby",
+    '5': "goerli",
+    '42':"kovan"
+}
+
+const web3ProviderCashe = {};
+function getWeb3(networkId) {
+    if(INFURA_NETWORK_SUBDOMAINS[networkId] === undefined)
+        return null;
+    if(web3ProviderCashe[networkId] !== undefined)
+        return web3ProviderCashe[networkId];
+
+    const httpProviderLink = `https://${INFURA_NETWORK_SUBDOMAINS[networkId]}.infura.io/v3/b12c1b1e6b2e4f58af559a67fe46104e`;
+    const wssProviderLink = `wss://${INFURA_NETWORK_SUBDOMAINS[networkId]}.infura.io/ws`
+    web3ProviderCashe[networkId] = new Web3(new Web3.providers.HttpProvider(httpProviderLink));
+    return  web3ProviderCashe[networkId];
+}
+var smartContractCashe = {};
+function getSmartContract(networkId) {
+    if(networkId === undefined){
+        networkId = window.ethereum.networkVersion;
+        if(web3ProviderCashe[networkId] === undefined)
+            web3ProviderCashe[networkId] = new Web3(window.web3.currentProvider);
     }
-    return _contract;
+    if(smartContractCashe[networkId] === undefined){
+        const web3 = getWeb3(networkId);
+        smartContractCashe[networkId] = new web3.eth.Contract(ABI, CONTRACT_ADDRESS[networkId]);
+    }
+    return smartContractCashe[networkId];
 }
 
 function updateKey(ipfsId) {
     return new Promise(function (resolve, reject) {
-        let contract = web3.eth.contract(ABI).at(CONTRACT_ADDRESS);
+        let contract = getSmartContract();
         contract.updateKey(ipfsId, (error, txHash) => {
             if (error)
                 reject(error);
@@ -28,7 +68,7 @@ function getIpfsKey(){
     // let web3 = new Web3(window.web3.currentProvider);
 
     return new Promise(function (resolve, reject) {
-        let contract = web3.eth.contract(ABI).at(CONTRACT_ADDRESS);
+        let contract = getSmartContract();
         contract.ipfsKey((error, key) => {
             if (error)
                 reject(error);
@@ -48,9 +88,33 @@ let lands = {
     ]
 }
 
-function getOwnerList(){
+function isMetaMaskEnabled(){
+    if (typeof window.ethereum == 'undefined' || !window.ethereum.isMetaMask) {
+        return false;
+    }
+    return true;
+}
+
+function metaMaskNetworkName(){
+    if(!isMetaMaskEnabled())
+        return "";
+    const networkId = window.ethereum.networkVersion;
+    return METAMASK_PROVIDER_LIST[networkId] || "Unknown";
+}
+
+function metaMaskUserWallet(){
+    return window.ethereum.selectedAddress;
+}
+
+function metaMaskGetUserDataOnOtherNetwork(wallet, networkId) {
     return new Promise(function (resolve, reject) {
-        let contract = getSmartContract();
+
+    })
+}
+
+function getOwnerList(networkId){
+    return new Promise(function (resolve, reject) {
+        let contract = getSmartContract(networkId);
         contract.methods.getOwners().call((error, response) => {
             if (error)
                 reject(error);
@@ -60,10 +124,10 @@ function getOwnerList(){
     })
 }
 
-function assignLand(wallet, x1, y1, x2, y2) {
+function assignLand(wallet, x1, y1, x2, y2, hash) {
     return new Promise(function (resolve, reject) {
         let contract = getSmartContract();
-        contract.methods.assignLand(x1, y1, x2, y2).send({from: wallet}, (error, result) => {
+        contract.methods.assignLand(x1, y1, x2, y2, hash || "").send({from: wallet}, (error, result) => {
             if (error)
                 reject(error);
             // it returns tx hash because sending tx
@@ -83,9 +147,9 @@ function updateLand(wallet, ipfsKey, index) {
     })
 }
 
-function getOwnerLand(wallet, landIndex) {
+function getOwnerLand(wallet, landIndex, networkId) {
     return new Promise(function (resolve, reject) {
-        let contract = getSmartContract();
+        let contract = getSmartContract(networkId);
         contract.methods.getLand(wallet, landIndex).call((error, response) => {
             if (error)
                 reject(error);
@@ -103,7 +167,7 @@ function getOwnerLand(wallet, landIndex) {
     })
 }
 
-function getOwnerLands(wallet) {
+function getOwnerLands(wallet, networkId) {
     return new Promise(async function (resolve, reject) {
         let index = 0,
             lands = [],
@@ -111,10 +175,10 @@ function getOwnerLands(wallet) {
         try {
             do {
                 console.log(`[STA] getting lands[${index}] ...`);
-                let currentLand = await getOwnerLand(wallet, index++);
-                console.log('[STA] land', currentLand);
+                let currentLand = await getOwnerLand(wallet, index++, networkId);
+                //console.log('[STA] land', currentLand);
                 let {x1, y1, x2, y2, time, ipfsKey} = currentLand;
-                console.log('[STA] obj', {x1, y1, x2, y2, time, ipfsKey});
+                //console.log('[STA] obj', {x1, y1, x2, y2, time, ipfsKey});
                 if (currentLand && currentLand.time > 0) {
                     lands.push({x1, y1, x2, y2, time, ipfsKey});
                 }else
@@ -128,13 +192,14 @@ function getOwnerLands(wallet) {
     })
 }
 
-function getUsersAssignee(){
+function getUsersAssignee(networkId){
     let owners = [];
-    return getOwnerList()
+    console.log(`loading users assignees [${INFURA_NETWORK_SUBDOMAINS[networkId]}]`);
+    return getOwnerList(networkId)
         .then(list => {
             console.log('[STA] owners list response', list);
             owners = list;
-            return Promise.all(owners.map(wallet => getOwnerLands(wallet)))
+            return Promise.all(owners.map(wallet => getOwnerLands(wallet, networkId)))
         })
         .then(landsOfOwners => {
             let result = {};
@@ -147,6 +212,10 @@ function getUsersAssignee(){
 }
 
 module.exports = {
+    METAMASK_PROVIDER_LIST,
+    isMetaMaskEnabled,
+    metaMaskNetworkName,
+    metaMaskUserWallet,
     updateKey,
     getIpfsKey,
     getUsersAssignee,

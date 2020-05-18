@@ -62,7 +62,8 @@ function main(userWallet, userAssignees, worldChanges) {
 
     var game = createEngine({
         userWallet,
-        exposeGlobal: true, pluginLoaders: {
+        exposeGlobal: true,
+        pluginLoaders: {
             'voxel-artpacks': require('voxel-artpacks'),
             'voxel-wireframe': require('voxel-wireframe'),
             'voxel-chunkborder': require('voxel-chunkborder'),
@@ -122,7 +123,9 @@ function main(userWallet, userAssignees, worldChanges) {
             // 'voxel-land': require('voxel-land'),
             // 'voxel-flatland': require('voxel-flatland'),
             'utopia-land-assign': require('./plugins/utopia-land-assign'),
-        }, pluginOpts: {
+            'utopia-data-transfer': require('./plugins/utopia-data-transfer'),
+        },
+        pluginOpts: {
             'voxel-engine-stackgl': {
                 appendDocument: true,
                 exposeGlobal: true,  // for debugging
@@ -288,6 +291,9 @@ function main(userWallet, userAssignees, worldChanges) {
                 enable: false,
                 wallet: userWallet,
                 assignees: userAssignees
+            },
+            'utopia-data-transfer':{
+                enable: false
             }
         }
     });
@@ -358,6 +364,10 @@ function main(userWallet, userAssignees, worldChanges) {
         console.log('assigning land to user ...');
         game.plugins.get('utopia-land-assign').toggle();
     })
+
+    document.getElementById('btn-data-transfer').addEventListener('click', () => {
+        game.plugins.get('utopia-data-transfer').toggle();
+    });
 
     game.plugins.get('utopia-land-assign').on('go-to-location', e => {
         // alert(JSON.stringify(e, null, 2));
@@ -498,13 +508,13 @@ function loadChanges() {
             // try{
             //     userChanges = JSON.parse(userChangesStr[0]);
             // }catch (e) {}
-            // console.log('World Changes:', userChanges)
+            // console.log('[STA] World Changes:', userChanges)
             // initGame(userChanges)
             main(userWallet, userAssignees, userChanges);
         })
         .catch(error => {
-            console.log(error);
-            alert(error.message);
+            console.log("Loading error:", error);
+            alert("Loading error: " + error.message);
         })
 }
 

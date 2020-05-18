@@ -137,6 +137,10 @@ class LandAssignClient extends LandAssignCommon {
         return this.assignees[this.opts.wallet.toUpperCase()];
     }
 
+    getAllAssignedLands(){
+        return this.assignees;
+    }
+
     onSaveBtnClick(){
         let rectangles = this.graphPaper.getPlugin('drawer').getRectangles(this.opts.wallet);
         console.log('rectangles', rectangles);

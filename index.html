@@ -50,14 +50,15 @@
         .toolbox .toolbox-item:not(:last-child){
             margin-bottom: 5px;
         }
-        .toolbox .toolbox-item button{
+        .toolbox .toolbox-item .action-btn{
             border: 0;
+            display: inline;
             background: rgba(255,255,255,0.5);
             cursor: pointer;
             padding: 4px 10px;
             border-radius: 4px;
         }
-        .toolbox .toolbox-item button:hover{
+        .toolbox .toolbox-item .action-btn:hover{
             background: rgba(0,0,255,0.5);
             color: white;
         }
@@ -82,6 +83,59 @@
             border-width: 0;
             cursor: pointer;
         }
+        .btn{
+            display: inline-block;
+            font-weight: 400;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: .1rem .75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: .25rem;
+            cursor: pointer;
+            margin-right: 0.5em;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+        .btn:active{
+            background: #1a1a1a;
+            color: white;
+        }
+        .btn.btn-primary {
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn.btn-secondary {
+            color: #fff;
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn.btn-success{
+            color: #fff;
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn.btn-danger {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn.btn-warning {
+            color: #212529;
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+        .btn.btn-info {
+            color: #fff;
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
     </style>
 </head>
 <body>
@@ -89,9 +143,10 @@
 <div id="container"></div>
 <div class="toolbox">
     <div class="toolbox-item">
-        <button id="connect-ethereum">Unlock</button>
-        <button id="btn-save">Save</button>
-        <button id="btn-assign-land">Map</button>
+        <div class="action-btn" id="connect-ethereum">Unlock</div>
+        <div class="action-btn" id="btn-save">Save</div>
+        <div class="action-btn" id="btn-assign-land">Map</div>
+        <div class="action-btn" id="btn-data-transfer">Data Transfer</div>
     </div>
 </div>
 <script src="game-bundle.js"></script>
