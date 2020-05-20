@@ -54,24 +54,23 @@ class DataTransferClient extends DataTransferCommon {
 
         //this.setSelectedIndex(0); // can't set this early; requires DOM
 
-        const container = this.createContainer();
-        this.container = container;
+        // const container = this.createContainer();
+        // this.container = container;
 
         const outerDiv = document.createElement('div');
 
         outerDiv.style.position = 'fixed';
         outerDiv.style.zIndex = 10;
         outerDiv.style.left = '0';
-        outerDiv.style.bottom = '0';
+        outerDiv.style.top = '0';
         outerDiv.style.width = '100%';
-        outerDiv.style.height = '70%';
+        outerDiv.style.height = '100%';
         outerDiv.style.visibility = 'hidden';
         outerDiv.style.transition = 'all 0.5s ease 0s';
-        outerDiv.style.opacity = 0;
         this.outerDiv = outerDiv;
 
         document.body.appendChild(outerDiv);
-        outerDiv.appendChild(container);
+        this.updateUI();
 
         this.enabled = this.opts.enable;
         this.onCancelBtnClick = this.onCancelBtnClick.bind(this);
@@ -168,26 +167,37 @@ class DataTransferClient extends DataTransferCommon {
     }
     updateUI(){
         this.outerDiv.innerHTML = "";
+        this.outerDiv.appendChild(this.createDimmer());
         this.container = this.createContainer();
         this.outerDiv.appendChild(this.container);
     }
     createContainer(){
         let container = document.createElement('div');
         container.innerHTML = renderTemplate(this.uiData);
-
-        // center at bottom of screen
-        // container.style.position = 'absolute';
-        // container.style.left = '0';
-        // container.style.top = '0';
-        // container.style.transform = 'translate(-50%, -50%)';
-        // container.style.float = '';
-        // container.style.border = '';  // not tight around edges
-
-        container.style.width = '100%';
-        container.style.height = '100%';
-        container.style.background = 'rgba(255,255,255,1.0)'
+        container.classList.add('disable-scrollbars');
+        container.style.display = 'inline-block'
+        container.style.position = 'absolute'
+        container.style.left = '50%'
+        container.style.top = '50%'
+        container.style.transform = 'translate(-50%, -50%)';
+        container.style.maxHeight = '80%';
+        container.style.overflowY = 'scroll';
+        container.style.background = 'rgba(0,0,0,0.5)'
+        container.style.color = 'white';
+        container.style.border = '1px solid white';
         container.style.padding = '0.5em';
         return container;
+    }
+    createDimmer(){
+        let dimmer = document.createElement('div');
+        dimmer.style.position = 'absolute'
+        dimmer.style.left = '0'
+        dimmer.style.top = '0'
+        dimmer.style.width = '100%'
+        dimmer.style.height = '100%'
+        dimmer.style.background = 'black'
+        dimmer.style.opacity = '0.8'
+        return dimmer;
     }
 }
 
@@ -209,14 +219,13 @@ function renderTemplate(data) {
                 <td>${land.y1}</td>
                 <td>${land.x2}</td>
                 <td>${land.y2}</td>
-                <td>${land.ipfsKey}</td>
              </tr>`
         )).join("")
     ) : '';
 
     let messages = "";
     let transferButton = ""
-    let cancelButton = `<div onclick="window.dispatchEvent(new CustomEvent('utopia-data-transfer-cancel'))" class="btn btn-danger">Cancel</div>`
+    let cancelButton = `<div class="btn btn-outline-danger" onclick="window.dispatchEvent(new CustomEvent('utopia-data-transfer-cancel'))">Cancel</div>`
 
     if(data.sourceLands.length > 0) {
         if (data.collisionChecked) {
@@ -227,7 +236,7 @@ function renderTemplate(data) {
                 "<div style='background: green; color: white'>Your can move your game data to current network.</div>";
         }
         if(data.collisionChecked && !data.collisionDetected){
-            transferButton = `<div onclick="window.dispatchEvent(new CustomEvent('utopia-data-transfer-transfer'))" class="btn btn-success">Transfer</div>`
+            transferButton = `<div class="btn btn-outline-success" onclick="window.dispatchEvent(new CustomEvent('utopia-data-transfer-transfer'))">Transfer</div>`
         }
     }
 
@@ -239,7 +248,7 @@ function renderTemplate(data) {
         Wallet Address: ${data.wallet}
         <h5 style="margin-bottom: 0">Select source network to copy your data into the ${data.currentNetwork}.</h5>
         <div style="margin-bottom: 1em">
-            <select onchange="window.dispatchEvent(new CustomEvent('utopia-data-transfer-source-changed', {detail:{value: this.options[this.selectedIndex].value}}))">
+            <select class="form-control" onchange="window.dispatchEvent(new CustomEvent('utopia-data-transfer-source-changed', {detail:{value: this.options[this.selectedIndex].value}}))">
                 <option value="">-- Select Network --</option>
                 ${sourceComboBoxItems}
             </select>
@@ -253,7 +262,6 @@ function renderTemplate(data) {
                 <td>Y1</td>
                 <td>X2</td>
                 <td>Y2</td>
-                <td>IPFS Key</td>
             </tr>
             ${landsList}
         </table>

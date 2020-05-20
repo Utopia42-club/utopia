@@ -4,7 +4,7 @@ let _web3=null, _contract=null;
 const CONTRACT_ADDRESS = {
     '1': '', // Main Net
     '3': '0x9344CdEc9cf176E3162758D23d1FC806a0AE08cf', // Ropsten
-    '4': '0x8092f992F75E08135c33e07CC49a504e90790b21', // Rinkeby
+    '4': '0xe72853152988fffb374763ad67ae577686cefa1a', // Rinkeby
     '5': '', // Goerli
     '42': '', // Kovan
 };
@@ -124,14 +124,31 @@ function getOwnerList(networkId){
     })
 }
 
-function assignLand(wallet, x1, y1, x2, y2, hash) {
+function getLandPrice(x1, y1, x2, y2) {
     return new Promise(function (resolve, reject) {
         let contract = getSmartContract();
-        contract.methods.assignLand(x1, y1, x2, y2, hash || "").send({from: wallet}, (error, result) => {
+        contract.methods.landPrice(x1, y1, x2, y2, ).call((error, price) => {
             if (error)
                 reject(error);
             // it returns tx hash because sending tx
-            resolve(result);
+            resolve(Web3.utils.fromWei(price).toString());
+        });
+    })
+}
+
+function assignLand(wallet, x1, y1, x2, y2, hash) {
+    return new Promise(function (resolve, reject) {
+        let contract = getSmartContract();
+        contract.methods.landPrice(x1, y1, x2, y2).call((error, amount) => {
+            if (error)
+                return reject(error);
+            //amount = Web3.utils.toWei((Web3.utils.fromWei(amount).toString()*2).toString());
+            contract.methods.assignLand(x1, y1, x2, y2, hash || "").send({from: wallet, value: amount}, (error, result) => {
+                if (error)
+                    return reject(error);
+                // it returns tx hash because sending tx
+                resolve(result);
+            });
         });
     })
 }
@@ -221,6 +238,7 @@ module.exports = {
     getUsersAssignee,
     getOwnerList,
     getOwnerLands,
+    getLandPrice,
     assignLand,
     updateLand,
 };

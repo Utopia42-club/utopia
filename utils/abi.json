@@ -53,6 +53,34 @@
   },
   {
     "constant": true,
+    "inputs": [],
+    "name": "fundsWallet",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "unitLandPrice",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [
       {
         "name": "",
@@ -247,8 +275,8 @@
     ],
     "name": "assignLand",
     "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
+    "payable": true,
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -299,6 +327,20 @@
     "constant": false,
     "inputs": [
       {
+        "name": "price",
+        "type": "uint256"
+      }
+    ],
+    "name": "adminSetUnitLandPrice",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
         "name": "addr",
         "type": "address"
       }
@@ -330,6 +372,56 @@
     ],
     "payable": false,
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "x1",
+        "type": "int256"
+      },
+      {
+        "name": "y1",
+        "type": "int256"
+      },
+      {
+        "name": "x2",
+        "type": "int256"
+      },
+      {
+        "name": "y2",
+        "type": "int256"
+      }
+    ],
+    "name": "landPrice",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "x",
+        "type": "int256"
+      }
+    ],
+    "name": "abs",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   }
 ]
