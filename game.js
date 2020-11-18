@@ -466,7 +466,7 @@ function loadChanges() {
             }
         })
         .then(() => {
-            userWallet = (web3 && web3.currentProvider!=undefined) ? web3.currentProvider.selectedAddress : TEST_WALLET_ADDRESS;
+            userWallet = web3.currentProvider.selectedAddress || TEST_WALLET_ADDRESS;
             console.log('[STA] ethereum enabled: ' + userWallet)
         })
         .then(getOwnerList)

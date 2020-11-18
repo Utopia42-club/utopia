@@ -41,7 +41,7 @@ function getWeb3(networkId) {
 var smartContractCashe = {};
 function getSmartContract(networkId) {
     if(networkId === undefined){
-        networkId = window.ethereum.networkVersion;
+        networkId = window.ethereum != undefined ? window.ethereum.networkVersion : '1';
         if(web3ProviderCashe[networkId] === undefined)
             web3ProviderCashe[networkId] = new Web3(window.web3.currentProvider);
     }
