@@ -1,7 +1,7 @@
 const ipfsClient = require('ipfs-http-client')
 // const ipfs = ipfsClient('/ip4/159.65.160.34/tcp/5001')
-const ipfs = ipfsClient('/ip4/165.227.29.137/tcp/5001')
-// const ipfs = ipfsClient('http://utopia42.club:5001')
+//const ipfs = ipfsClient('/ip4/165.227.29.137/tcp/5001')
+const ipfs = ipfsClient({host: 'utopia42.club', port:443, protocol:'https'})
 // const ipfs = ipfsClient('/ip4/127.0.0.1/tcp/5001')
 
 const TEST_MODE = false;

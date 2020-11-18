@@ -10,7 +10,7 @@ var {
     updateLand
 } = require('./utils/ethereum');
 
-const TEST_MODE = true;
+const TEST_MODE = false;
 const TEST_WALLET_ADDRESS = '0xE602D154C00cB2c1570AF23d631191838C0F072a';
 
 function separateChangesOfRegions(regions, chunkSize, changes){
@@ -466,7 +466,7 @@ function loadChanges() {
             }
         })
         .then(() => {
-            userWallet = web3.currentProvider.selectedAddress || TEST_WALLET_ADDRESS;
+            userWallet = (web3 && web3.currentProvider!=undefined) ? web3.currentProvider.selectedAddress : TEST_WALLET_ADDRESS;
             console.log('[STA] ethereum enabled: ' + userWallet)
         })
         .then(getOwnerList)

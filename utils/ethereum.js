@@ -2,9 +2,9 @@ const Web3 = require('web3');
 let _web3=null, _contract=null;
 
 const CONTRACT_ADDRESS = {
-    '1': '', // Main Net
+    '1': '0x56040d44f407fa6f33056d4f352d2e919a0d99fb', // Main Net
     '3': '0x9344CdEc9cf176E3162758D23d1FC806a0AE08cf', // Ropsten
-    '4': '0xe72853152988fffb374763ad67ae577686cefa1a', // Rinkeby
+    '4': '0x801fC75707BEB6d2aE8863D7A3B66047A705ffc0', //'0xe72853152988fffb374763ad67ae577686cefa1a', // Rinkeby
     '5': '', // Goerli
     '42': '', // Kovan
 };
@@ -103,6 +103,8 @@ function metaMaskNetworkName(){
 }
 
 function metaMaskUserWallet(){
+	if(window.ethereum == undefined)
+		return '0xE602D154C00cB2c1570AF23d631191838C0F072a';
     return window.ethereum.selectedAddress;
 }
 
