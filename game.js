@@ -433,7 +433,7 @@ function web3Init(){
     try {
         _web3 = web3;
     }catch (e) {
-        let rpcUrl = "https://ropsten.infura.io/ocCdekUYwOyLn7h7OlJM";
+        let rpcUrl = "https://ropsten.infura.io/v3/b12c1b1e6b2e4f58af559a67fe46104e";
         _web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 
         // _web3.eth.accounts.wallet.add(account);
