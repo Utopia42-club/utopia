@@ -8,7 +8,7 @@ const CONTRACT_ADDRESS = {
     '5': '', // Goerli
     '42': '', // Kovan
     '56': '',
-    '97': '0xF4A32bddD4C85dC175Ce377AEc4AC3FB8d04C9D8'
+    '97': '0x044630826A56C768D3FAC17f907EA38aE90BE2B3'
 };
 const ABI = require('./abi');
 
