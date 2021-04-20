@@ -6,7 +6,7 @@
 module.exports = {
   "apps": [
     {
-      "name": "utopia",
+      "name": "utopia-game",
       "script": "npm",
       "args" : "start"
     }

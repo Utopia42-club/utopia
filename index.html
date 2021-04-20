@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>voxelmetaverse</title>
+    <title>Utopia</title>
     <style>
         body {
             background-color: gray;
@@ -12,6 +12,19 @@
             -webkit-user-select: none;
             -ms-user-select: none;
         }
+        .disable-scrollbars::-webkit-scrollbar {
+            width: 0px;
+            background: transparent; /* Chrome/Safari/Webkit */
+        }
+
+        .disable-scrollbars {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE 10+ */
+        }
+
+.farmaF{
+	visibility: unset !important;
+}
 
         #crosshair {
             /* centered on screen */
@@ -50,16 +63,152 @@
         .toolbox .toolbox-item:not(:last-child){
             margin-bottom: 5px;
         }
-        .toolbox .toolbox-item button{
+        .toolbox .toolbox-item .action-btn{
             border: 0;
+            display: inline;
             background: rgba(255,255,255,0.5);
             cursor: pointer;
             padding: 4px 10px;
             border-radius: 4px;
         }
-        .toolbox .toolbox-item button:hover{
+        .toolbox .toolbox-item .action-btn:hover{
             background: rgba(0,0,255,0.5);
             color: white;
+        }
+        #arena-chat{
+            z-index: 999;
+            position: absolute;
+            visibility: hidden;
+        }
+        body.enable-chat #arena-chat{
+            visibility: visible;
+        }
+        .btn-chat-toggle{
+            position: absolute;
+            right: 1em;
+            bottom: 1em;
+            z-index: 99;
+            width: 4em;
+            height: 4em;
+            background: white;
+            outline: none;
+            border-radius: 2em;
+            border-width: 0;
+            cursor: pointer;
+        }
+        .btn{
+            display: inline-block;
+            font-weight: 400;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: .1rem .75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: .25rem;
+            cursor: pointer;
+            margin-right: 0.5em;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+        .btn:active{
+            background: #1a1a1a;
+            color: white;
+        }
+        .btn.btn-primary {
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn.btn-secondary {
+            color: #fff;
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn.btn-success{
+            color: #fff;
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn.btn-danger {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn.btn-warning {
+            color: #212529;
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+        .btn.btn-info {
+            color: #fff;
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+        .btn.btn-outline-primary {
+            color: #007bff;
+            background-color: transparent;
+            background-image: none;
+            border-color: #007bff;
+        }
+        .btn.btn-outline-secondary {
+            color: #6c757d;
+            background-color: transparent;
+            background-image: none;
+            border-color: #6c757d;
+        }
+        .btn.btn-outline-success {
+            color: #28a745;
+            background-color: transparent;
+            background-image: none;
+            border-color: #28a745;
+        }
+        .btn.btn-outline-danger {
+            color: #dc3545;
+            background-color: transparent;
+            background-image: none;
+            border-color: #dc3545;
+        }
+        .btn.btn-outline-warning {
+            color: #ffc107;
+            background-color: transparent;
+            background-image: none;
+            border-color: #ffc107;
+        }
+        .btn.btn-outline-info {
+            color: #17a2b8;
+            background-color: transparent;
+            background-image: none;
+            border-color: #17a2b8;
+        }
+        .btn.btn-outline-light {
+            color: #f8f9fa;
+            background-color: transparent;
+            background-image: none;
+            border-color: #f8f9fa;
+        }
+        .btn.btn-outline-dark {
+            color: #343a40;
+            background-color: transparent;
+            background-image: none;
+            border-color: #343a40;
+        }
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: .1rem .75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
         }
     </style>
 </head>
@@ -68,12 +217,26 @@
 <div id="container"></div>
 <div class="toolbox">
     <div class="toolbox-item">
-        <button id="connect-ethereum">Unlock</button>
-        <button id="btn-save">Save</button>
+        <div class="action-btn" id="connect-ethereum">Unlock</div>
+        <div class="action-btn" id="btn-save">Save</div>
+        <div class="action-btn" id="btn-assign-land">Map</div>
+        <div class="action-btn" id="btn-data-transfer">Data Transfer</div>
     </div>
 </div>
-<script src="bundle.js"></script>
+<script src="./game-bundle.js"></script>
 
-<div id="crosshair"><img src="crosshair4.png"></div>
+<div id="crosshair"><img src="./crosshair4.png"></div>
+
+<!-- arena.im message box -->
+<button class="btn-chat-toggle" onclick="toggleChatbox()">chat</button>
+<div id="arena-chat" data-publisher="utopia" data-chatroom="utopia-global" data-position="in-page"></div>
+<script async src="https://go.arena.im/public/js/arenachatlib.js?p=utopia&e=utopia-global"></script>
+<script>
+    function toggleChatbox() {
+        var element = document.body;
+        element.classList.toggle("enable-chat");
+    }
+</script>
+
 </body>
 </html>

@@ -4,7 +4,15 @@ module.exports = function(game, opts) {
     return new UtopiaLand(game, opts);
 };
 module.exports.pluginInfo = {
-    loadAfter: ['voxel-registry', 'voxel-recipes', 'voxel-food', 'voxel-mesher', 'voxel-materials', 'voxel-world-changes']
+    loadAfter: [
+        'voxel-registry',
+        'voxel-recipes',
+        'voxel-food',
+        'voxel-mesher',
+        'voxel-materials',
+        'voxel-world-changes',
+        'utopia-land-assign'
+    ]
 };
 
 function UtopiaLand(game, opts) {
@@ -15,6 +23,8 @@ function UtopiaLand(game, opts) {
 
     this.worldChanges = game.plugins.get('voxel-world-changes');
     if (!this.worldChanges) throw new Error('utopia-land requires voxel-world-changes plugin');
+
+    this.landAssign = game.plugins.get('utopia-land-assign');
 
     opts = opts || {};
     this.opts = JSON.parse(JSON.stringify(opts));
@@ -31,6 +41,16 @@ UtopiaLand.prototype.disable = function() {
 
 UtopiaLand.prototype.changedValue = function(voxel){
     return this.worldChanges.changes[voxel.join('_')];
+}
+
+UtopiaLand.prototype.checkUserAssignedArea = function(rectangles, x, y){
+    if(!rectangles || rectangles.length === 0)
+        return false;
+    for(let {x1, x2, y1, y2} of rectangles){
+        if(x1 <= x && x <= x2 && y1 <= y && y <= y2)
+            return true;
+    }
+    return false;
 }
 
 UtopiaLand.prototype.missingChunk = function(position) {
@@ -67,6 +87,8 @@ UtopiaLand.prototype.missingChunk = function(position) {
     var h = pad >> 1;
     var voxels = voxelsPadded.lo(h,h,h).hi(width,width,width);
 
+    let userAssignedRectangles = this.landAssign.getUserAssignedRectangles();
+
     if(position[1] < 0){
         for (let x = 0; x < this.game.chunkSize; ++x) {
             for (let z = 0; z < this.game.chunkSize; ++z) {
@@ -79,8 +101,16 @@ UtopiaLand.prototype.missingChunk = function(position) {
         if(position[1] === 0){
             for (let x = 0; x < this.game.chunkSize; ++x) {
                 for (let z = 0; z < this.game.chunkSize; ++z) {
+                    let isInUserAssignedArea = this.checkUserAssignedArea(
+                        userAssignedRectangles,
+                        x + position[0] * this.game.chunkSize,
+                        z + position[2] * this.game.chunkSize
+                    );
                     for (let y = 0; y < this.game.chunkSize; ++y) {
-                        voxels.set(x, y, z, y===this.game.chunkSize-1 ? grassIndex : dirtIndex);
+                        if(isInUserAssignedArea)
+                            voxels.set(x, y, z, y===this.game.chunkSize-1 ? grassIndex : dirtIndex);
+                        else
+                            voxels.set(x, y, z, bedrockIndex);
                     }
                 }
             }

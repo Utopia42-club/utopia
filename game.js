@@ -1,12 +1,69 @@
 const createEngine = require('voxel-engine-stackgl');
+const Web3 = require('web3');
+const ItemPile = require('itempile');
 var ipfsMethods = require('./utils/ipfs');
-var {updateKey, ipfsKey} = require('./utils/ethereum');
+var {
+    getUsersAssignee,
+    getOwnerList,
+    getOwnerLands,
+    assignLand,
+    updateLand
+} = require('./utils/ethereum');
 
-function main(worldChanges) {
-    console.log('voxelmetaverse starting'); // TODO: show git version (browserify-commit-sha)
+const TEST_MODE = false;
+const TEST_WALLET_ADDRESS = '0xE602D154C00cB2c1570AF23d631191838C0F072a';
+
+function separateChangesOfRegions(regions, chunkSize, changes){
+    let regionChanges = new Array(regions.length).fill(0).map(i => ({}));
+    for(let chunkId in changes){
+        let chunkChanges = changes[chunkId];
+        let diff = chunkId.split('_').map(i => (parseInt(i)*chunkSize));
+        Object.keys(chunkChanges)
+            .map(key => chunkChanges[key])
+            .map(({voxel, name}) => {
+                let worldPos = [voxel[0]+diff[0], voxel[1]+diff[1], voxel[2]+diff[2]]
+                for(let r_i=0 ;r_i<regions.length ; r_i++) {
+                    let {x1, y1, x2, y2} = regions[r_i];
+                    if(x1<=worldPos[0] && worldPos[0]<=x2 && y1<=worldPos[2] && worldPos[2]<=y2){
+                        let key0 = worldPos.join('_');
+                        regionChanges[r_i][key0] = {voxel: worldPos, name};
+                        break;
+                    }
+                }
+            })
+    }
+    return regionChanges;
+}
+
+function mergeChangesOfRegions(regions, chunkSize, worldChanges) {
+    let changes = {};
+    for(let region of worldChanges){
+        Object.keys(region)
+            .map(key => region[key])
+            .map(({voxel, name}) => {
+                let chunk = voxel.map(n => Math.floor(n/chunkSize));
+                let voxel2 = voxel.map((n,i) => (n-chunk[i]*chunkSize));
+
+                let chunkKey = chunk.join('_');
+                let voxelKey = voxel2.join('_');
+
+                if(changes[chunkKey] === undefined)
+                    changes[chunkKey] = {};
+                if(changes[chunkKey][voxelKey] === undefined)
+                    changes[chunkKey][voxelKey] = {}
+                changes[chunkKey][voxelKey] = {voxel: voxel2, name}
+            })
+    }
+    return changes;
+}
+
+function main(userWallet, userAssignees, worldChanges) {
+    console.log('voxelmetaverse starting with user assignees:', userAssignees); // TODO: show git version (browserify-commit-sha)
 
     var game = createEngine({
-        exposeGlobal: true, pluginLoaders: {
+        userWallet,
+        exposeGlobal: true,
+        pluginLoaders: {
             'voxel-artpacks': require('voxel-artpacks'),
             'voxel-wireframe': require('voxel-wireframe'),
             'voxel-chunkborder': require('voxel-chunkborder'),
@@ -62,10 +119,13 @@ function main(worldChanges) {
             'voxel-player': require('voxel-player'),
             'voxel-world-changes': require('./plugins/voxel-world-changes'),
             'voxel-land': require('./plugins/utopia-land'),
-            'voxel-materials': require('./plugins/utopia-materials')
+            'voxel-materials': require('./plugins/utopia-materials'),
             // 'voxel-land': require('voxel-land'),
             // 'voxel-flatland': require('voxel-flatland'),
-        }, pluginOpts: {
+            'utopia-land-assign': require('./plugins/utopia-land-assign'),
+            'utopia-data-transfer': require('./plugins/utopia-data-transfer'),
+        },
+        pluginOpts: {
             'voxel-engine-stackgl': {
                 appendDocument: true,
                 exposeGlobal: true,  // for debugging
@@ -133,7 +193,7 @@ function main(worldChanges) {
 
             'voxel-mesher': {},
             'game-shell-fps-camera': {
-                position: [-4, -50, -4],
+                position: [-4, -90, -4],
                 rotationY: 0.75 * Math.PI,
             },
 
@@ -191,7 +251,10 @@ function main(worldChanges) {
             'voxel-gamemode': {},
             // Increases voxel-control's max walk speed when forward is double-tapped
             'voxel-sprint': {},
-            'voxel-inventory-hotbar': {inventorySize: 10, wheelEnable: true},
+            'voxel-inventory-hotbar': {
+                inventorySize: 10,
+                wheelEnable: true
+            },
             'voxel-inventory-crafting': {},
             'voxel-reach': {reachDistance: 8},
             // using a transparent texture decal for block break progress
@@ -224,74 +287,234 @@ function main(worldChanges) {
                 // changes: {'0_0_0': {'0_31_0': {voxel:[0,31,0], name: 'air'}}}
                 changes: worldChanges
             },
+            'utopia-land-assign': {
+                enable: false,
+                wallet: userWallet,
+                assignees: userAssignees
+            },
+            'utopia-data-transfer':{
+                enable: false
+            }
         }
     });
 
     document.getElementById('btn-save').addEventListener('click', () => {
         let changes = game.plugins.get('voxel-world-changes').exportChanges();
-        // console.log('world changes', changes);
+        let userAssignedRegions = game.plugins.get('utopia-land-assign').getUserAssignedRectangles();
+
+        let changesToSaveInIpfs = separateChangesOfRegions(userAssignedRegions, game.chunkSize, changes);
+        console.log('[STA] all regions', userAssignedRegions);
+        console.log('[STA] changes of regions', changesToSaveInIpfs);
+
+        let allPromise = [];
+        for(let i=0 ; i<userAssignedRegions.length ; i++){
+            if(Object.keys(changesToSaveInIpfs[i]).length > 0) {
+                allPromise.push(ipfsMethods.save(JSON.stringify({
+                    v: '0.0.0',
+                    wallet: userWallet,
+                    region: userAssignedRegions[i],
+                    changes: changesToSaveInIpfs[i]
+                })))
+            }else {
+                allPromise.push(Promise.resolve(undefined));
+            }
+        }
+        Promise.all(allPromise)
+            .then(ipfsKeys => {
+                console.log('[STA] ipfsKeys after save', ipfsKeys);
+                let allIpfsUpdates = [];
+                for (let i in ipfsKeys){
+                    if(ipfsKeys[i])
+                        allIpfsUpdates.push(updateLand(userWallet, ipfsKeys[i], i))
+                }
+                return Promise.all(allIpfsUpdates);
+            })
+            .then(res => {
+                console.log('[STA] updateLand', res);
+                alert('Changes saved into the blockchain successfully')
+            })
+            .catch(error)
+
+
         // // window.localStorage.setItem('voxel-changes', JSON.stringify(changes))
-        Promise.resolve(true)
-            .then(() => {
-                return ethereum.enable()
+
+        // Promise.resolve(true)
+        //     .then(() => {
+        //         return ethereum.enable()
+        //     })
+        //     // .then(() => {
+        //     //     web3.eth.defaultAccount = web3.eth.accounts[0];
+        //     // })
+        //     .then(() => {
+        //         return ipfsMethods.save(JSON.stringify(changes));
+        //     })
+        //     .then(ipfsId => {
+        //         return updateKey(ipfsId)
+        //     })
+        //     .then(txHash => {
+        //         console.log('txHash', txHash);
+        //     })
+        //     .catch(error => {
+        //         console.log(error);
+        //         alert(error.message);
+        //     })
+    })
+
+    document.getElementById('btn-assign-land').addEventListener('click', () => {
+        console.log('assigning land to user ...');
+        game.plugins.get('utopia-land-assign').toggle();
+    })
+
+    document.getElementById('btn-data-transfer').addEventListener('click', () => {
+        game.plugins.get('utopia-data-transfer').toggle();
+    });
+
+    game.plugins.get('utopia-land-assign').on('go-to-location', e => {
+        // alert(JSON.stringify(e, null, 2));
+        let {x, y} = e.xy;
+        // alert(`going to X:${x}, Y:${y}`);
+        // game.playerAABB(x, 50, y);
+        game.plugins.get('game-shell-fps-camera').camera.position.set([-x, -40, -y]);
+    })
+    game.plugins.get('utopia-land-assign').on('save', rectangles => {
+        console.log('[STA] rectangles to save: ', rectangles)
+        let allPromise = rectangles
+            .filter(r => !r.time)
+            .map(({x, y, w, h}) => {
+                return assignLand(userWallet, x, y, x+w, y+h);
             })
-            .then(() => {
-                web3.eth.defaultAccount = web3.eth.accounts[0];
-            })
-            .then(() => {
-                return ipfsMethods.save(JSON.stringify(changes));
-            })
-            .then(ipfsId => {
-                return updateKey(ipfsId)
-            })
-            .then(txHash => {
-                console.log('txHash', txHash);
+        Promise.all(allPromise)
+            .then(res => {
+                window.location.reload();
             })
             .catch(error => {
-                console.log(error);
-                alert(error.message);
+                console.error('[STA]', error);
             })
     })
+
+    // TODO: hide ui buttons on drain
+    game.controls.on('drain', () => {
+        console.log('[STA] controls emits drain');
+    })
+    // TODO: show ui buttons on pause
+    game.controls.on('pause', () => {
+        console.log('[STA] controls emits pause');
+    })
+    // game.controls.on('end', () => {
+    //     console.log('[STA] controls emits end');
+    // })
+    // game.controls.on('data', data => {
+    //     console.log('[STA] controls emits data', data);
+    // })
+
+    setInterval(() => {
+        try {
+            let inventoryHotBar = game.plugins.get('voxel-inventory-hotbar');
+            inventoryHotBar.inventory.set(0, new ItemPile('dirt', 64, {}));
+        }catch (e) {
+            console.error("===============", e);
+        }
+    }, 15000);
+}
+
+function loadAllIpfsFiles(assignees) {
+    let allPromise = []
+    for(let wallet in assignees){
+        for(let region of assignees[wallet]){
+            if(region.ipfsKey)
+                allPromise.push(ipfsMethods.getFile(region.ipfsKey))
+        }
+    }
+    return Promise.all(allPromise);
+}
+
+function web3Init(){
+    let _web3;
+    try {
+        _web3 = web3;
+    }catch (e) {
+        let rpcUrl = "https://mainnet.infura.io/v3/b12c1b1e6b2e4f58af559a67fe46104e";
+        _web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+
+        // _web3.eth.accounts.wallet.add(account);
+        _web3.eth.defaultAccount = TEST_WALLET_ADDRESS;
+        // _web3.currentProvider.selectedAddress = account.address;
+
+        // _web3.eth.accounts.wallet.add(TEST_WALLET_PRIVATE_KEY);
+        // _web3.eth.defaultAccount = TEST_WALLET_ADDRESS;
+        _web3.eth.getAccounts().then(acc => {
+            console.log('account list >>>>', acc);
+        });
+    }
+    window.web3 = _web3;
 }
 
 function loadChanges() {
+    // let web3 = new Web3(window.web3.currentProvider);
+    web3Init();
 
+    let userWallet = null;
+    let userAssignees = {};
     console.log('loading world changes ...');
     // Promise.resolve(true)
     Promise.resolve(true)
         .then(() => {
-            return ethereum.enable()
+            try {
+                return ethereum.enable();
+            }catch (e) {
+                console.error(e);
+            }
         })
         .then(() => {
-            console.log('ethereum enabled')
-            web3.eth.defaultAccount = web3.eth.accounts[0];
+            userWallet = web3.currentProvider.selectedAddress || TEST_WALLET_ADDRESS;
+            console.log('[STA] ethereum enabled: ' + userWallet)
+        })
+        .then(getOwnerList)
+        .then(owners => {
+            console.log('[STA] owners', owners);
         })
         .then(() => {
-            return ipfsKey();
+            console.log('[STA] retrieve IPFS key ...')
+            return getUsersAssignee();
         })
-        .then(ipfsId => {
-            console.log('IPFS file id: ', ipfsId);
-            console.log('Looking for IPFS file ...');
-            return ipfsMethods.getFile(ipfsId)
+        .then(assignees => {
+            userAssignees = assignees;
+            console.log('[STA] total assignees:', assignees);
+            console.log('[STA] Looking for IPFS file ...');
+            return loadAllIpfsFiles(assignees)
+        })
+        .then(ipfsFileContents => {
+            console.log('[STA] IPFS files contents', ipfsFileContents);
+            let worldChanges = ipfsFileContents.map(JSON.parse).map(c => c.changes);
+            let changes = mergeChangesOfRegions(userAssignees, 32, worldChanges);
+            console.log('[STA] merged ipfs content', changes);
+            return changes;
+            // if(TEST_MODE){
+            //     return ["{}", "{}"];
+            // }else{
+            //     Promise.all(userAssignees[userWallet].map(rectangle => {
+            //         return ipfsMethods.getFile(rectangle.ipfsKey)
+            //     }))
+            // }
         })
         .catch(error => {
-
-            console.log('error', error);
-            return `{}`;
+            console.error('[STA]', error);
+            return {};
         })
-        .then(userChangesStr => {
-            console.log('file from ipfs', userChangesStr);
-            let userChanges = {};
-            try{
-                userChanges = JSON.parse(userChangesStr);
-            }catch (e) {}
-            console.log('World Changes:', userChanges)
+        .then(userChanges => {
+            // console.log('file from ipfs', userChangesStr);
+            // // TODO: this is array of ipfs files that should be merged
+            // let userChanges = {};
+            // try{
+            //     userChanges = JSON.parse(userChangesStr[0]);
+            // }catch (e) {}
+            // console.log('[STA] World Changes:', userChanges)
             // initGame(userChanges)
-            main(userChanges);
+            main(userWallet, userAssignees, userChanges);
         })
         .catch(error => {
-            console.log(error);
-            alert(error.message);
+            console.log("Loading error:", error);
+            alert("Loading error: " + error.message);
         })
 }
 
