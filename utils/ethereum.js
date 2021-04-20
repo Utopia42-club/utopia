@@ -209,9 +209,9 @@ function getOwnerLands(wallet, networkId) {
             do {
                 console.log(`[STA] getting lands[${index}] ...`);
                 let currentLand = await getOwnerLand(wallet, index++, networkId);
-                //console.log('[STA] land', currentLand);
+                console.log('[STA] land', currentLand);
                 let {x1, y1, x2, y2, time, ipfsKey} = currentLand;
-                //console.log('[STA] obj', {x1, y1, x2, y2, time, ipfsKey});
+                console.log('[STA] obj', {x1, y1, x2, y2, time, ipfsKey});
                 if (currentLand && currentLand.time > 0) {
                     lands.push({x1, y1, x2, y2, time, ipfsKey});
                 }else
@@ -220,6 +220,7 @@ function getOwnerLands(wallet, networkId) {
 
             resolve(lands);
         }catch (e) {
+            console.log('[STA] land reject', e);
             reject(e);
         }
     })
