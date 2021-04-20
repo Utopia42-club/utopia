@@ -7,6 +7,8 @@ const CONTRACT_ADDRESS = {
     '4': '0x801fC75707BEB6d2aE8863D7A3B66047A705ffc0', //'0xe72853152988fffb374763ad67ae577686cefa1a', // Rinkeby
     '5': '', // Goerli
     '42': '', // Kovan
+    '56': '',
+    '97': '0xF4A32bddD4C85dC175Ce377AEc4AC3FB8d04C9D8'
 };
 const ABI = require('./abi');
 
@@ -15,7 +17,9 @@ var METAMASK_PROVIDER_LIST = {
     '3': "Ropsten Test Network",
     '4': "Rinkeby Test Network",
     '5': "Goerli Test Network",
-    '42':"Kovan Test Network"
+    '42':"Kovan Test Network",
+    '56': "Binance Smart Chain",
+    '97': "Binance Smart Chain Test"
 };
 
 const INFURA_NETWORK_SUBDOMAINS = {
@@ -23,7 +27,9 @@ const INFURA_NETWORK_SUBDOMAINS = {
     '3': "ropsten",
     '4': "rinkeby",
     '5': "goerli",
-    '42':"kovan"
+    '42':"kovan",
+    '56': "bsc",
+    '97': "bsctest"
 }
 
 const web3ProviderCashe = {};
@@ -33,8 +39,16 @@ function getWeb3(networkId) {
     if(web3ProviderCashe[networkId] !== undefined)
         return web3ProviderCashe[networkId];
 
-    const httpProviderLink = `https://${INFURA_NETWORK_SUBDOMAINS[networkId]}.infura.io/v3/b12c1b1e6b2e4f58af559a67fe46104e`;
-    const wssProviderLink = `wss://${INFURA_NETWORK_SUBDOMAINS[networkId]}.infura.io/ws`
+    var httpProviderLink = `https://${INFURA_NETWORK_SUBDOMAINS[networkId]}.infura.io/v3/b12c1b1e6b2e4f58af559a67fe46104e`;
+    var wssProviderLink = `wss://${INFURA_NETWORK_SUBDOMAINS[networkId]}.infura.io/ws`
+    if(INFURA_NETWORK_SUBDOMAINS[networkId] == 'bsctest'){
+        // testnet
+        httpProviderLink = 'https://data-seed-prebsc-1-s1.binance.org:8545';
+    }   
+    if(INFURA_NETWORK_SUBDOMAINS[networkId] == 'bsc'){
+        // mainnet 
+        httpProviderLink = 'https://bsc-dataseed1.binance.org:443';
+    }
     web3ProviderCashe[networkId] = new Web3(new Web3.providers.HttpProvider(httpProviderLink));
     return  web3ProviderCashe[networkId];
 }
